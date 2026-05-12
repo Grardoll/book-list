@@ -3,120 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>圖書繳費統計系統</title>
+    <title>書報費用統計系統</title>
     <style>
-        body { font-family: sans-serif; margin: 20px; background-color: #f4f7f6; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h2 { color: #333; }
-        .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px; background: #eee; padding: 15px; border-radius: 5px; }
-        input, select, button { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
-        button { cursor: pointer; background-color: #28a745; color: white; border: none; }
-        button:hover { background-color: #218838; }
-        .btn-delete { background-color: #dc3545; margin-left: 5px; }
-        .btn-paid { background-color: #007bff; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #f8f9fa; }
-        .status-unpaid { color: #dc3545; font-weight: bold; }
-        .status-paid { color: #28a745; font-weight: bold; }
-        .config-section { margin-top: 30px; border-top: 2px solid #eee; pt: 10px; }
+        body { font-family: "Microsoft JhengHei", sans-serif; margin: 20px; background-color: #f0f2f5; color: #333; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #1a73e8; border-bottom: 2px solid #1a73e8; padding-bottom: 10px; }
+        
+        .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; background: #f8f9fa; padding: 20px; border-radius: 8px; align-items: center; }
+        input, select, button { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+        
+        button { cursor: pointer; transition: 0.3s; background: #1a73e8; color: white; border: none; }
+        button:hover { background: #1557b0; }
+        
+        .user-card { border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
+        .user-header { background: #e8f0fe; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+        .total-amount { color: #d93025; font-size: 1.1em; }
+        
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { padding: 12px 20px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #fafafa; font-size: 0.9em; color: #666; }
+        
+        .status-unpaid { color: #d93025; background: #fce8e6; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; }
+        .status-paid { color: #1e8e3e; background: #e6f4ea; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; }
+        
+        .btn-paid { background: #34a853; margin-right: 5px; }
+        .btn-delete { background: #ea4335; }
+        .config-section { margin-top: 40px; padding: 20px; border: 1px dashed #ccc; border-radius: 8px; }
+        .tag { display: inline-block; background: #eee; padding: 5px 10px; margin: 3px; border-radius: 20px; font-size: 13px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>📚 圖書購買繳費統計</h2>
+    <h2>📋 書報費用統計系統</h2>
     
-    <!-- 新增紀錄紀錄區 -->
+    <!-- 輸入區 -->
     <div class="controls">
+        <strong>新增紀錄：</strong>
         <select id="userSelect"></select>
-        <input type="text" id="bookName" placeholder="輸入書名">
-        <input type="number" id="bookPrice" placeholder="費用">
-        <button onclick="addRecord()">新增紀錄</button>
+        
+        <!-- 書名輸入與選單 -->
+        <input type="text" id="bookInput" list="bookList" placeholder="輸入或選擇書名">
+        <datalist id="bookList"></datalist>
+        
+        <input type="number" id="bookPrice" placeholder="金額" style="width: 80px;">
+        <button onclick="addRecord()">確認新增</button>
     </div>
 
-    <!-- 統計表格 -->
-    <table>
-        <thead>
-            <tr>
-                <th>姓名</th>
-                <th>書名</th>
-                <th>費用</th>
-                <th>繳費狀態</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody id="recordTable"></tbody>
-    </table>
+    <!-- 顯示區 -->
+    <div id="displayArea"></div>
 
-    <!-- 名單管理區 -->
+    <!-- 管理區 -->
     <div class="config-section">
-        <h3>👥 名單管理</h3>
+        <h3>👥 成員名單管理</h3>
         <input type="text" id="newUserName" placeholder="新成員姓名">
-        <button onclick="addNewUser()">新增成員</button>
-        <p><small>* 您可以點擊下方選單內的成員進行刪減</small></p>
-        <div id="userTagCloud"></div>
+        <button onclick="addNewUser()">加入名單</button>
+        <div id="userTags" style="margin-top:15px;"></div>
     </div>
 </div>
 
 <script>
-    // 初始名單
+    // 初始資料
     let users = ["林正義", "林陳雪紅", "於同心", "於簡瑋妤", "顧哲綸", "顧簡煜儒", "林筠倩", "魏家安", "李慧卿", "呂陳珮寧", "郭彥廷", "郭周瑞琪", "周洪明惠", "江桐郁", "江陳姱蓁", "鄭容朱", "俞勇", "俞葉蘭英", "申金秀麗", "翁勝利", "翁李世英", "陳黃素美", "曾蔡文惠", "李傳承", "劉怡心"];
-    let records = [];
+    let books = []; // 儲存書名清單
+    let records = []; // { userName, bookName, price, paid }
 
-    // 初始化讀取
     window.onload = function() {
-        const savedUsers = localStorage.getItem('bookUsers');
-        const savedRecords = localStorage.getItem('bookRecords');
-        if (savedUsers) users = JSON.parse(savedUsers);
-        if (savedRecords) records = JSON.parse(savedRecords);
+        if(localStorage.getItem('sys_users')) users = JSON.parse(localStorage.getItem('sys_users'));
+        if(localStorage.getItem('sys_books')) books = JSON.parse(localStorage.getItem('sys_books'));
+        if(localStorage.getItem('sys_records')) records = JSON.parse(localStorage.getItem('sys_records'));
         renderAll();
     };
 
     function renderAll() {
-        renderUserSelect();
-        renderRecords();
         saveData();
+        renderInputControls();
+        renderDisplayArea();
+        renderUserTags();
     }
 
-    function renderUserSelect() {
-        const select = document.getElementById('userSelect');
-        const cloud = document.getElementById('userTagCloud');
-        select.innerHTML = "";
-        cloud.innerHTML = "";
-        users.forEach((user, index) => {
-            select.innerHTML += `<option value="${user}">${user}</option>`;
-            cloud.innerHTML += `<button class="btn-delete" onclick="removeUser(${index})">${user} ×</button> `;
-        });
-    }
-
-    function addNewUser() {
-        const name = document.getElementById('newUserName').value;
-        if (name) {
-            users.push(name);
-            document.getElementById('newUserName').value = "";
-            renderAll();
-        }
-    }
-
-    function removeUser(index) {
-        if (confirm("確定要刪除這位成員嗎？")) {
-            users.splice(index, 1);
-            renderAll();
-        }
+    function renderInputControls() {
+        const uSelect = document.getElementById('userSelect');
+        const bList = document.getElementById('bookList');
+        
+        uSelect.innerHTML = users.map(u => `<option value="${u}">${u}</option>`).join('');
+        bList.innerHTML = books.map(b => `<option value="${b}">`).join('');
     }
 
     function addRecord() {
-        const name = document.getElementById('userSelect').value;
-        const book = document.getElementById('bookName').value;
-        const price = document.getElementById('bookPrice').value;
-        
-        if (!book || !price) return alert("請輸入書名與費用");
+        const user = document.getElementById('userSelect').value;
+        const book = document.getElementById('bookInput').value.trim();
+        const price = parseFloat(document.getElementById('bookPrice').value);
 
-        records.push({ name, book, price, paid: false });
-        document.getElementById('bookName').value = "";
+        if(!book || isNaN(price)) return alert("請填寫完整的書名與金額");
+
+        // 自動記錄新書名
+        if(!books.includes(book)) {
+            books.push(book);
+        }
+
+        records.push({ userName: user, bookName: book, price: price, paid: false });
+        
+        // 清空輸入框
+        document.getElementById('bookInput').value = "";
         document.getElementById('bookPrice').value = "";
         renderAll();
+    }
+
+    function renderDisplayArea() {
+        const area = document.getElementById('displayArea');
+        area.innerHTML = "";
+
+        // 找出所有有購買紀錄的人
+        const activeUsers = [...new Set(records.map(r => r.userName))];
+
+        if(activeUsers.length === 0) {
+            area.innerHTML = "<p style='color:#999;'>目前尚無購買紀錄</p>";
+            return;
+        }
+
+        activeUsers.forEach(user => {
+            const userRecords = records.filter(r => r.userName === user);
+            const total = userRecords.reduce((sum, r) => sum + r.price, 0);
+            const unpaidTotal = userRecords.filter(r => !r.paid).reduce((sum, r) => sum + r.price, 0);
+
+            let html = `
+                <div class="user-card">
+                    <div class="user-header">
+                        <span>👤 ${user}</span>
+                        <span class="total-amount">總計：$${total} (未繳：$${unpaidTotal})</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th width="40%">書名</th>
+                                <th width="20%">金額</th>
+                                <th width="15%">狀態</th>
+                                <th width="25%">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            records.forEach((r, index) => {
+                if(r.userName === user) {
+                    html += `
+                        <tr>
+                            <td>${r.bookName}</td>
+                            <td>$${r.price}</td>
+                            <td><span class="${r.paid ? 'status-paid' : 'status-unpaid'}">${r.paid ? '已繳' : '未繳'}</span></td>
+                            <td>
+                                <button class="btn-paid" onclick="togglePaid(${index})">${r.paid ? '設為未繳' : '確認繳費'}</button>
+                                <button class="btn-delete" onclick="deleteRecord(${index})">刪除</button>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+
+            html += `</tbody></table></div>`;
+            area.innerHTML += html;
+        });
     }
 
     function togglePaid(index) {
@@ -125,32 +172,39 @@
     }
 
     function deleteRecord(index) {
-        records.splice(index, 1);
-        renderAll();
+        if(confirm("確定要刪除這筆書目嗎？")) {
+            records.splice(index, 1);
+            renderAll();
+        }
     }
 
-    function renderRecords() {
-        const table = document.getElementById('recordTable');
-        table.innerHTML = "";
-        records.forEach((re, i) => {
-            table.innerHTML += `
-                <tr>
-                    <td>${re.name}</td>
-                    <td>${re.book}</td>
-                    <td>$${re.price}</td>
-                    <td class="${re.paid ? 'status-paid' : 'status-unpaid'}">${re.paid ? '已繳費' : '未繳費'}</td>
-                    <td>
-                        <button class="btn-paid" onclick="togglePaid(${i})">${re.paid ? '設為未繳' : '確認繳費'}</button>
-                        <button class="btn-delete" onclick="deleteRecord(${i})">刪除</button>
-                    </td>
-                </tr>
-            `;
-        });
+    function addNewUser() {
+        const name = document.getElementById('newUserName').value.trim();
+        if(name && !users.includes(name)) {
+            users.push(name);
+            document.getElementById('newUserName').value = "";
+            renderAll();
+        }
+    }
+
+    function removeUser(name) {
+        if(confirm(`確定要從名單刪除 ${name} 嗎？`)) {
+            users = users.filter(u => u !== name);
+            renderAll();
+        }
+    }
+
+    function renderUserTags() {
+        const div = document.getElementById('userTags');
+        div.innerHTML = users.map(u => `
+            <span class="tag">${u} <span style="cursor:pointer;color:red;margin-left:5px" onclick="removeUser('${u}')">×</span></span>
+        `).join('');
     }
 
     function saveData() {
-        localStorage.setItem('bookUsers', JSON.stringify(users));
-        localStorage.setItem('bookRecords', JSON.stringify(records));
+        localStorage.setItem('sys_users', JSON.stringify(users));
+        localStorage.setItem('sys_books', JSON.stringify(books));
+        localStorage.setItem('sys_records', JSON.stringify(records));
     }
 </script>
 
