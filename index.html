@@ -9,40 +9,34 @@
         .container { max-width: 1200px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h2 { color: #1a73e8; border-bottom: 2px solid #1a73e8; padding-bottom: 10px; margin-top: 0; text-align: center; }
         h3 { color: #555; margin-bottom: 15px; font-size: 1.05em; border-left: 4px solid #1a73e8; padding-left: 10px; }
-        
-        /* 頂部兩欄並排佈局 */
         .top-row { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
         .flex-item { flex: 1; min-width: 350px; background: #f8f9fa; padding: 18px; border-radius: 8px; border: 1px solid #eef0f2; }
-        
         .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
         input, select, button { padding: 9px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
-        
         button { cursor: pointer; transition: 0.3s; background: #1a73e8; color: white; border: none; }
         button:hover { background: #1557b0; }
         
-        /* 查詢螢幕樣式 */
-        .query-screen { background: #2c3e50; color: white; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+        /* 查詢螢幕加強版 */
+        .query-screen { background: #2c3e50; color: white; padding: 20px; border-radius: 8px; margin-bottom: 30px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.2); }
         .query-screen h3 { color: #ecf0f1; border-left: 4px solid #3498db; }
-        .unpaid-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+        .stats-bar { display: flex; gap: 20px; margin: 15px 0; background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 6px; }
+        .stats-item { font-size: 0.95em; }
+        .stats-val { font-weight: bold; color: #f1c40f; font-size: 1.2em; margin: 0 5px; }
+        .unpaid-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
         .unpaid-name { background: #e74c3c; color: white; padding: 6px 12px; border-radius: 5px; font-weight: bold; }
         .no-data { color: #bdc3c7; font-style: italic; }
 
-        /* 明細表格樣式 */
         .user-card { border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px; overflow: hidden; background: white; }
         .user-header { background: #e8f0fe; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
         .total-amount { color: #d93025; font-size: 1.1em; }
-        
-        table { width: 100%; border-collapse: collapse; background: white; }
+        table { width: 100%; border-collapse: collapse; }
         th, td { padding: 12px 20px; text-align: left; border-bottom: 1px solid #eee; }
         th { background: #fafafa; font-size: 0.9em; color: #666; }
-        
         .status-unpaid { color: #d93025; background: #fce8e6; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; }
         .status-paid { color: #1e8e3e; background: #e6f4ea; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; }
-        
         .btn-paid { background: #34a853; margin-right: 5px; }
         .btn-delete { background: #ea4335; }
-        
-        .tag { display: inline-block; background: #fff; border: 1px solid #ddd; padding: 4px 10px; margin: 2px; border-radius: 15px; font-size: 12px; color: #555; }
+        .tag { display: inline-block; background: #fff; border: 1px solid #ddd; padding: 4px 10px; margin: 2px; border-radius: 15px; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -50,9 +44,7 @@
 <div class="container">
     <h2>📋 書報費用統計系統</h2>
     
-    <!-- 第一排：新增紀錄 與 名單管理 -->
     <div class="top-row">
-        <!-- 左邊：新增紀錄 -->
         <div class="flex-item">
             <h3>➕ 新增購買紀錄</h3>
             <div class="controls">
@@ -64,7 +56,6 @@
             </div>
         </div>
 
-        <!-- 右邊：成員名單管理 -->
         <div class="flex-item">
             <h3>👥 名單管理</h3>
             <div class="controls" style="margin-bottom: 10px;">
@@ -75,7 +66,7 @@
         </div>
     </div>
 
-    <!-- 第二排：未繳費快速查詢 -->
+    <!-- 未繳費快速查詢螢幕 -->
     <div class="query-screen">
         <h3>🚫 未繳費快速查詢</h3>
         <div style="margin-bottom: 12px;">
@@ -85,23 +76,20 @@
             </select>
         </div>
         <div id="unpaidResultArea">
-            <p class="no-data">請選擇書名以查看未繳名單</p>
+            <p class="no-data">請選擇書名以查看統計</p>
         </div>
     </div>
 
-    <!-- 第三排：購買明細 -->
     <h3>🔍 詳細購買明細 (依人員分類)</h3>
     <div id="displayArea"></div>
 </div>
 
 <script>
     let users = ["林正義", "林陳雪紅", "於同心", "於簡瑋妤", "顧哲綸", "顧簡煜儒", "林筠倩", "魏家安", "李慧卿", "呂陳珮寧", "郭彥廷", "郭周瑞琪", "周洪明惠", "江桐郁", "江陳姱蓁", "鄭容朱", "俞勇", "俞葉蘭英", "申金秀麗", "翁勝利", "翁李世英", "陳黃素美", "曾蔡文惠", "李傳承", "劉怡心"];
-    let books = [];
     let records = [];
 
     window.onload = function() {
         if(localStorage.getItem('sys_users')) users = JSON.parse(localStorage.getItem('sys_users'));
-        if(localStorage.getItem('sys_books')) books = JSON.parse(localStorage.getItem('sys_books'));
         if(localStorage.getItem('sys_records')) records = JSON.parse(localStorage.getItem('sys_records'));
         renderAll();
     };
@@ -115,18 +103,28 @@
         renderUnpaidQuery();
     }
 
+    // 動態獲取目前紀錄中存在的書名
+    function getActiveBooks() {
+        return [...new Set(records.map(r => r.bookName))];
+    }
+
     function renderInputControls() {
         const uSelect = document.getElementById('userSelect');
         const bList = document.getElementById('bookList');
         uSelect.innerHTML = users.map(u => `<option value="${u}">${u}</option>`).join('');
-        bList.innerHTML = books.map(b => `<option value="${b}">`).join('');
+        bList.innerHTML = getActiveBooks().map(b => `<option value="${b}">`).join('');
     }
 
     function renderQuerySelect() {
         const qSelect = document.getElementById('queryBookSelect');
         const currentVal = qSelect.value;
+        const activeBooks = getActiveBooks();
+        
+        // 如果原本選的書已經被刪光了，重置選單
+        const keepVal = activeBooks.includes(currentVal) ? currentVal : "";
+        
         qSelect.innerHTML = '<option value="">-- 請選擇書名 --</option>' + 
-                            books.map(b => `<option value="${b}" ${b === currentVal ? 'selected' : ''}>${b}</option>`).join('');
+                            activeBooks.map(b => `<option value="${b}" ${b === keepVal ? 'selected' : ''}>${b}</option>`).join('');
     }
 
     function addRecord() {
@@ -134,7 +132,6 @@
         const book = document.getElementById('bookInput').value.trim();
         const price = parseFloat(document.getElementById('bookPrice').value);
         if(!book || isNaN(price)) return alert("請填寫書名與金額");
-        if(!books.includes(book)) books.push(book);
         records.push({ userName: user, bookName: book, price: price, paid: false });
         document.getElementById('bookInput').value = "";
         document.getElementById('bookPrice').value = "";
@@ -156,7 +153,7 @@
             let html = `<div class="user-card"><div class="user-header"><span>👤 ${user}</span><span class="total-amount">總計：$${total} (未繳：$${unpaidTotal})</span></div><table><thead><tr><th>書名</th><th width="100px">金額</th><th width="80px">狀態</th><th width="180px">操作</th></tr></thead><tbody>`;
             records.forEach((r, index) => {
                 if(r.userName === user) {
-                    html += `<tr><td>${r.bookName}</td><td>$${r.price}</td><td><span class="${r.paid ? 'status-paid' : 'status-unpaid'}">${r.paid ? '已繳' : '未繳'}</span></td><td><button class="btn-paid" onclick="togglePaid(${index})">${r.paid ? '設為未繳' : '確認繳費'}</button><button class="btn-delete" onclick="deleteRecord(${index})">刪除</button></td></tr>`;
+                    html += `<tr><td>${r.bookName}</td><td>$${r.price}</td><td><span class="${r.paid ? 'status-paid' : 'status-unpaid'}">${r.paid ? '已繳' : '未繳'}</span></td><td><button class="btn-paid" onclick="togglePaid(${index})">${r.paid ? '設為未繳' : '確認繳費'}</button> <button class="btn-delete" onclick="deleteRecord(${index})">刪除</button></td></tr>`;
                 }
             });
             html += `</tbody></table></div>`;
@@ -168,16 +165,30 @@
         const selectedBook = document.getElementById('queryBookSelect').value;
         const resultArea = document.getElementById('unpaidResultArea');
         if (!selectedBook) {
-            resultArea.innerHTML = '<p class="no-data">請選擇書名以查看未繳名單</p>';
+            resultArea.innerHTML = '<p class="no-data">請選擇書名以查看統計</p>';
             return;
         }
-        const unpaidUsers = records.filter(r => r.bookName === selectedBook && !r.paid).map(r => r.userName);
-        const uniqueUnpaid = [...new Set(unpaidUsers)];
-        if (uniqueUnpaid.length === 0) {
-            resultArea.innerHTML = '<p style="color:#2ecc71;">此書目所有人都已繳費 🎉</p>';
+
+        const bookRecords = records.filter(r => r.bookName === selectedBook);
+        const orderCount = bookRecords.length;
+        const unpaidRecords = bookRecords.filter(r => !r.paid);
+        const unpaidAmount = unpaidRecords.reduce((sum, r) => sum + r.price, 0);
+        const unpaidUsers = [...new Set(unpaidRecords.map(r => r.userName))];
+
+        let html = `
+            <div class="stats-bar">
+                <div class="stats-item">訂購人數：<span class="stats-val">${orderCount}</span> 人</div>
+                <div class="stats-item">待收金額(未繳)：<span class="stats-val">$${unpaidAmount}</span></div>
+            </div>
+        `;
+
+        if (unpaidUsers.length === 0) {
+            html += '<p style="color:#2ecc71; font-weight:bold;">✅ 此書目所有人都已繳費！</p>';
         } else {
-            resultArea.innerHTML = '<div class="unpaid-list">' + uniqueUnpaid.map(name => `<div class="unpaid-name">${name}</div>`).join('') + '</div>';
+            html += '<p style="font-size:0.9em; margin-bottom:5px;">尚未繳費名單：</p>';
+            html += '<div class="unpaid-list">' + unpaidUsers.map(name => `<div class="unpaid-name">${name}</div>`).join('') + '</div>';
         }
+        resultArea.innerHTML = html;
     }
 
     function togglePaid(index) {
@@ -215,7 +226,6 @@
 
     function saveData() {
         localStorage.setItem('sys_users', JSON.stringify(users));
-        localStorage.setItem('sys_books', JSON.stringify(books));
         localStorage.setItem('sys_records', JSON.stringify(records));
     }
 </script>
