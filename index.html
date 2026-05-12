@@ -6,17 +6,28 @@
     <title>書報費用統計系統</title>
     <style>
         body { font-family: "Microsoft JhengHei", sans-serif; margin: 20px; background-color: #f0f2f5; color: #333; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { color: #1a73e8; border-bottom: 2px solid #1a73e8; padding-bottom: 10px; margin-top: 0; }
-        h3 { color: #555; margin-bottom: 15px; font-size: 1.1em; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #1a73e8; border-bottom: 2px solid #1a73e8; padding-bottom: 10px; margin-top: 0; text-align: center; }
+        h3 { color: #555; margin-bottom: 15px; font-size: 1.05em; border-left: 4px solid #1a73e8; padding-left: 10px; }
         
-        .section { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #eef0f2; }
-        .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-        input, select, button { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+        /* 頂部兩欄並排佈局 */
+        .top-row { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+        .flex-item { flex: 1; min-width: 350px; background: #f8f9fa; padding: 18px; border-radius: 8px; border: 1px solid #eef0f2; }
+        
+        .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        input, select, button { padding: 9px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
         
         button { cursor: pointer; transition: 0.3s; background: #1a73e8; color: white; border: none; }
         button:hover { background: #1557b0; }
         
+        /* 查詢螢幕樣式 */
+        .query-screen { background: #2c3e50; color: white; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+        .query-screen h3 { color: #ecf0f1; border-left: 4px solid #3498db; }
+        .unpaid-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+        .unpaid-name { background: #e74c3c; color: white; padding: 6px 12px; border-radius: 5px; font-weight: bold; }
+        .no-data { color: #bdc3c7; font-style: italic; }
+
+        /* 明細表格樣式 */
         .user-card { border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px; overflow: hidden; background: white; }
         .user-header { background: #e8f0fe; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
         .total-amount { color: #d93025; font-size: 1.1em; }
@@ -31,14 +42,7 @@
         .btn-paid { background: #34a853; margin-right: 5px; }
         .btn-delete { background: #ea4335; }
         
-        .tag { display: inline-block; background: #fff; border: 1px solid #ddd; padding: 5px 12px; margin: 3px; border-radius: 20px; font-size: 13px; }
-        
-        /* 查詢螢幕樣式 */
-        .query-screen { background: #2c3e50; color: white; padding: 25px; border-radius: 8px; }
-        .query-screen h3 { color: #ecf0f1; border-left: 4px solid #3498db; padding-left: 10px; }
-        .unpaid-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
-        .unpaid-name { background: #e74c3c; color: white; padding: 8px 15px; border-radius: 5px; font-weight: bold; }
-        .no-data { color: #bdc3c7; font-style: italic; }
+        .tag { display: inline-block; background: #fff; border: 1px solid #ddd; padding: 4px 10px; margin: 2px; border-radius: 15px; font-size: 12px; color: #555; }
     </style>
 </head>
 <body>
@@ -46,47 +50,48 @@
 <div class="container">
     <h2>📋 書報費用統計系統</h2>
     
-    <!-- 1. 新增紀錄區 -->
-    <div class="section">
-        <h3>➕ 新增購買紀錄</h3>
-        <div class="controls">
-            <select id="userSelect"></select>
-            <input type="text" id="bookInput" list="bookList" placeholder="輸入或選擇書名">
-            <datalist id="bookList"></datalist>
-            <input type="number" id="bookPrice" placeholder="金額" style="width: 80px;">
-            <button onclick="addRecord()">確認新增</button>
+    <!-- 第一排：新增紀錄 與 名單管理 -->
+    <div class="top-row">
+        <!-- 左邊：新增紀錄 -->
+        <div class="flex-item">
+            <h3>➕ 新增購買紀錄</h3>
+            <div class="controls">
+                <select id="userSelect" style="flex: 1;"></select>
+                <input type="text" id="bookInput" list="bookList" placeholder="書名" style="flex: 1.5;">
+                <datalist id="bookList"></datalist>
+                <input type="number" id="bookPrice" placeholder="金額" style="width: 70px;">
+                <button onclick="addRecord()">新增</button>
+            </div>
+        </div>
+
+        <!-- 右邊：成員名單管理 -->
+        <div class="flex-item">
+            <h3>👥 名單管理</h3>
+            <div class="controls" style="margin-bottom: 10px;">
+                <input type="text" id="newUserName" placeholder="新成員姓名" style="flex: 1;">
+                <button onclick="addNewUser()">加入</button>
+            </div>
+            <div id="userTags"></div>
         </div>
     </div>
 
-    <!-- 2. 成員名單管理 -->
-    <div class="section">
-        <h3>👥 成員名單管理</h3>
-        <div class="controls" style="margin-bottom: 15px;">
-            <input type="text" id="newUserName" placeholder="新成員姓名">
-            <button onclick="addNewUser()">加入名單</button>
-        </div>
-        <div id="userTags"></div>
-    </div>
-
-    <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
-
-    <!-- 3. 繳費紀錄顯示區 -->
-    <h3>🔍 詳細購買明細 (依人員分類)</h3>
-    <div id="displayArea"></div>
-
-    <!-- 4. 未繳費查詢螢幕 -->
+    <!-- 第二排：未繳費快速查詢 -->
     <div class="query-screen">
         <h3>🚫 未繳費快速查詢</h3>
-        <div style="margin-bottom: 15px;">
-            <label>選擇書目：</label>
-            <select id="queryBookSelect" onchange="renderUnpaidQuery()" style="background: #34495e; color: white; border: 1px solid #5d6d7e;">
+        <div style="margin-bottom: 12px;">
+            <label>篩選書目：</label>
+            <select id="queryBookSelect" onchange="renderUnpaidQuery()" style="background: #34495e; color: white; border: 1px solid #5d6d7e; min-width: 200px;">
                 <option value="">-- 請選擇書名 --</option>
             </select>
         </div>
         <div id="unpaidResultArea">
-            <p class="no-data">請選擇上方書名以查看未繳費名單</p>
+            <p class="no-data">請選擇書名以查看未繳名單</p>
         </div>
     </div>
+
+    <!-- 第三排：購買明細 -->
+    <h3>🔍 詳細購買明細 (依人員分類)</h3>
+    <div id="displayArea"></div>
 </div>
 
 <script>
@@ -107,7 +112,7 @@
         renderDisplayArea();
         renderUserTags();
         renderQuerySelect();
-        renderUnpaidQuery(); // 重新整理時同步更新查詢結果
+        renderUnpaidQuery();
     }
 
     function renderInputControls() {
@@ -128,7 +133,7 @@
         const user = document.getElementById('userSelect').value;
         const book = document.getElementById('bookInput').value.trim();
         const price = parseFloat(document.getElementById('bookPrice').value);
-        if(!book || isNaN(price)) return alert("請填寫完整的書名與金額");
+        if(!book || isNaN(price)) return alert("請填寫書名與金額");
         if(!books.includes(book)) books.push(book);
         records.push({ userName: user, bookName: book, price: price, paid: false });
         document.getElementById('bookInput').value = "";
@@ -141,14 +146,14 @@
         area.innerHTML = "";
         const activeUsers = [...new Set(records.map(r => r.userName))];
         if(activeUsers.length === 0) {
-            area.innerHTML = "<p style='color:#999; margin-bottom:20px;'>目前尚無購買紀錄</p>";
+            area.innerHTML = "<p style='color:#999;'>尚無購買紀錄</p>";
             return;
         }
         activeUsers.forEach(user => {
             const userRecords = records.filter(r => r.userName === user);
             const total = userRecords.reduce((sum, r) => sum + r.price, 0);
             const unpaidTotal = userRecords.filter(r => !r.paid).reduce((sum, r) => sum + r.price, 0);
-            let html = `<div class="user-card"><div class="user-header"><span>👤 ${user}</span><span class="total-amount">總計：$${total} (未繳：$${unpaidTotal})</span></div><table><thead><tr><th width="40%">書名</th><th width="20%">金額</th><th width="15%">狀態</th><th width="25%">操作</th></tr></thead><tbody>`;
+            let html = `<div class="user-card"><div class="user-header"><span>👤 ${user}</span><span class="total-amount">總計：$${total} (未繳：$${unpaidTotal})</span></div><table><thead><tr><th>書名</th><th width="100px">金額</th><th width="80px">狀態</th><th width="180px">操作</th></tr></thead><tbody>`;
             records.forEach((r, index) => {
                 if(r.userName === user) {
                     html += `<tr><td>${r.bookName}</td><td>$${r.price}</td><td><span class="${r.paid ? 'status-paid' : 'status-unpaid'}">${r.paid ? '已繳' : '未繳'}</span></td><td><button class="btn-paid" onclick="togglePaid(${index})">${r.paid ? '設為未繳' : '確認繳費'}</button><button class="btn-delete" onclick="deleteRecord(${index})">刪除</button></td></tr>`;
@@ -159,24 +164,19 @@
         });
     }
 
-    // 新增：未繳費查詢邏輯
     function renderUnpaidQuery() {
         const selectedBook = document.getElementById('queryBookSelect').value;
         const resultArea = document.getElementById('unpaidResultArea');
         if (!selectedBook) {
-            resultArea.innerHTML = '<p class="no-data">請選擇上方書名以查看未繳費名單</p>';
+            resultArea.innerHTML = '<p class="no-data">請選擇書名以查看未繳名單</p>';
             return;
         }
-        const unpaidUsers = records
-            .filter(r => r.bookName === selectedBook && !r.paid)
-            .map(r => r.userName);
+        const unpaidUsers = records.filter(r => r.bookName === selectedBook && !r.paid).map(r => r.userName);
         const uniqueUnpaid = [...new Set(unpaidUsers)];
         if (uniqueUnpaid.length === 0) {
-            resultArea.innerHTML = '<p style="color:#2ecc71;">恭喜！此書目所有人都已完成繳費 🎉</p>';
+            resultArea.innerHTML = '<p style="color:#2ecc71;">此書目所有人都已繳費 🎉</p>';
         } else {
-            resultArea.innerHTML = '<p>以下成員尚未繳費：</p><div class="unpaid-list">' + 
-                                   uniqueUnpaid.map(name => `<div class="unpaid-name">${name}</div>`).join('') + 
-                                   '</div>';
+            resultArea.innerHTML = '<div class="unpaid-list">' + uniqueUnpaid.map(name => `<div class="unpaid-name">${name}</div>`).join('') + '</div>';
         }
     }
 
@@ -202,7 +202,7 @@
     }
 
     function removeUser(name) {
-        if(confirm(`確定要從名單刪除 ${name} 嗎？`)) {
+        if(confirm(`從名單刪除 ${name}？`)) {
             users = users.filter(u => u !== name);
             renderAll();
         }
@@ -210,7 +210,7 @@
 
     function renderUserTags() {
         const div = document.getElementById('userTags');
-        div.innerHTML = users.map(u => `<span class="tag">${u} <span style="cursor:pointer;color:red;margin-left:5px" onclick="removeUser('${u}')">×</span></span>`).join('');
+        div.innerHTML = users.map(u => `<span class="tag">${u} <span style="cursor:pointer;color:red;margin-left:4px" onclick="removeUser('${u}')">×</span></span>`).join('');
     }
 
     function saveData() {
