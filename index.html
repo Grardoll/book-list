@@ -30,19 +30,29 @@
         .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
         
         .input-group { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; background: white; }
-        .input-label { background: #f0f0f0; padding: 6px 10px; font-size: 12px; color: #777; border-right: 1px solid #ddd; }
+        .input-label { background: #f0f0f0; padding: 6px 10px; font-size: 12px; color: #777; border-right: 1px solid #ddd; white-space: nowrap; }
         input, select, button { padding: 8px; border: none; font-size: 13px; outline: none; }
         
         .btn-primary { background: var(--primary-color); color: white; border-radius: 6px; padding: 8px 20px; cursor: pointer; }
         .btn-danger { background: var(--danger-color); color: white; border-radius: 6px; padding: 6px 15px; font-size: 12px; cursor: pointer; border: none; }
 
-        /* 查詢區 */
-        .query-screen { background: var(--primary-color); color: white; padding: 18px; border-radius: 12px; margin-bottom: 30px; }
-        .query-screen select { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; margin-left: 10px; padding: 5px; }
-        .stats-bar { display: flex; gap: 30px; margin: 10px 0; font-size: 14px; }
-        .stats-val { color: #ffe66d; font-weight: bold; }
+        /* 查詢區優化：確保選單始終清晰顯示 */
+        .query-screen { background: var(--primary-color); color: white; padding: 20px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .query-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+        .query-screen select { 
+            background: white; 
+            color: var(--text-color); 
+            border: 1px solid #ccc; 
+            border-radius: 6px; 
+            padding: 8px 12px; 
+            min-width: 200px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .stats-bar { display: flex; gap: 30px; margin: 10px 0; font-size: 14px; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; }
+        .stats-val { color: #ffe66d; font-weight: bold; font-size: 1.1em; }
 
-        /* 明細標題與主刪除按鈕 */
+        /* 明細標題 */
         .detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 
         /* 明細卡片 */
@@ -54,7 +64,7 @@
         table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
         th { background: #f8f9fa; color: #999; font-weight: 400; padding: 10px; text-align: left; }
         td { padding: 10px; border-bottom: 1px solid #f9f9f9; word-break: break-all; }
-        .note-input { width: 90%; border: 1px solid transparent; background: transparent; font-size: 12px; color: #888; border-bottom: 1px solid transparent; }
+        .note-input { width: 90%; border: 1px solid transparent; background: transparent; font-size: 12px; color: #888; }
         .note-input:focus { border-bottom: 1px solid var(--accent-color); outline: none; background: #fff; }
         
         .paid-tag { font-size: 11px; padding: 2px 6px; border-radius: 3px; }
@@ -83,10 +93,10 @@
         <div class="flex-box">
             <h3>➕ 新增購買</h3>
             <div class="controls">
-                <div class="input-group"><div class="input-label">人</div><select id="userSelect" style="width: 80px;"></select></div>
-                <div class="input-group"><div class="input-label">書</div><input type="text" id="bookInput" list="bookList" oninput="autoFillPrice()" style="width: 100px;"><datalist id="bookList"></datalist></div>
-                <div class="input-group"><div class="input-label">金</div><input type="number" id="bookPrice" style="width: 60px;"></div>
-                <div class="input-group"><div class="input-label">量</div><input type="number" id="bookQty" value="1" style="width: 40px;"></div>
+                <div class="input-group"><div class="input-label">購買人</div><select id="userSelect" style="width: 90px;"></select></div>
+                <div class="input-group"><div class="input-label">書名</div><input type="text" id="bookInput" list="bookList" oninput="autoFillPrice()" style="width: 100px;"><datalist id="bookList"></datalist></div>
+                <div class="input-group"><div class="input-label">價格</div><input type="number" id="bookPrice" style="width: 60px;"></div>
+                <div class="input-group"><div class="input-label">數量</div><input type="number" id="bookQty" value="1" style="width: 40px;"></div>
                 <button class="btn-primary" onclick="addRecord()">新增</button>
             </div>
         </div>
@@ -101,12 +111,15 @@
         </div>
     </div>
 
+    <!-- 未繳費查詢區域優化 -->
     <div class="query-screen">
-        <div style="display:flex; align-items:center; justify-content: space-between;">
+        <div class="query-header">
             <span style="font-size: 1.1em; letter-spacing: 1px;">🚫 未繳費查詢</span>
-            <select id="queryBookSelect" onchange="renderUnpaidQuery()"><option value="">-- 請選擇書名 --</option></select>
+            <select id="queryBookSelect" onchange="renderUnpaidQuery()">
+                <option value="">-- 請選取書名 --</option>
+            </select>
         </div>
-        <div id="unpaidResultArea"><p style="font-size:12px; color: rgba(255,255,255,0.4); margin-top:10px;">請選擇書目...</p></div>
+        <div id="unpaidResultArea"><p style="font-size:12px; color: rgba(255,255,255,0.6); margin-top:5px;">請從上方選取書目以查看即時統計數據</p></div>
     </div>
 
     <div class="detail-header">
@@ -163,7 +176,6 @@
         renderAll();
     }
 
-    // 全域批次刪除
     function deleteGlobalSelected() {
         const checkboxes = document.querySelectorAll('.record-checkbox:checked');
         if(checkboxes.length === 0) return alert("請先勾選要刪除的紀錄");
@@ -174,7 +186,6 @@
         }
     }
 
-    // 區域全選
     function toggleUserSelect(userName, checked) {
         const checkboxes = document.querySelectorAll(`.chk-${userName}`);
         checkboxes.forEach(cb => cb.checked = checked);
@@ -184,7 +195,7 @@
         const area = document.getElementById('displayArea');
         area.innerHTML = "";
         const activeUsers = [...new Set(records.map(r => r.userName))];
-        if(activeUsers.length === 0) { area.innerHTML = "<p style='color:#ccc; text-align:center; padding: 40px;'>尚無資料</p>"; return; }
+        if(activeUsers.length === 0) { area.innerHTML = "<p style='color:#ccc; text-align:center; padding: 40px;'>尚無明細資料</p>"; return; }
         
         activeUsers.forEach(user => {
             const userRecords = records.filter(r => r.userName === user);
@@ -200,7 +211,7 @@
                         </div>
                     </div>
                     <table>
-                        <thead><tr><th width="30"></th><th>書名</th><th width="60">單價</th><th width="40">量</th><th width="150">備註</th><th width="60">狀態</th><th width="80">操作</th></tr></thead>
+                        <thead><tr><th width="30"></th><th>書名</th><th width="60">價格</th><th width="40">數量</th><th width="150">備註</th><th width="60">狀態</th><th width="80">操作</th></tr></thead>
                         <tbody>`;
             
             records.forEach((r, i) => {
@@ -234,35 +245,39 @@
         const names = [...new Set(unpaid.map(r => r.userName))];
         res.innerHTML = `
             <div class="stats-bar">
-                <div>訂購：<span class="stats-val">${recs.length}</span> 份</div>
-                <div>待收：<span class="stats-val">$${sum}</span></div>
+                <div>訂購總數：<span class="stats-val">${recs.length}</span> 份</div>
+                <div>未收金額總計：<span class="stats-val">$${sum}</span></div>
             </div>
-            ${names.length ? `<div class="unpaid-list">${names.map(n => `<div class="unpaid-name">${n}</div>`).join('')}</div>` : '<p style="font-size:12px;">✅ 項目已結清</p>'}
+            ${names.length ? `<div class="unpaid-list">${names.map(n => `<div class="unpaid-name">${n}</div>`).join('')}</div>` : '<p style="font-size:12px;">✅ 本項目所有成員皆已結清</p>'}
         `;
     }
 
     function updateNote(i, v) { records[i].note = v; saveData(); }
     function togglePaid(i) { records[i].paid = !records[i].paid; renderAll(); }
-    function deleteSingle(i) { if(confirm("確定刪除此筆？")) { records.splice(i, 1); renderAll(); } }
+    function deleteSingle(i) { if(confirm("確定刪除此筆記錄？")) { records.splice(i, 1); renderAll(); } }
+    
     function renderQuerySelect() {
         const q = document.getElementById('queryBookSelect');
         const v = q.value;
         const active = getActiveBooks();
-        q.innerHTML = '<option value="">-- 請選擇書名 --</option>' + active.map(b => `<option value="${b}" ${b === v ? 'selected' : ''}>${b}</option>`).join('');
+        q.innerHTML = '<option value="">-- 請選取書名 --</option>' + active.map(b => `<option value="${b}" ${b === v ? 'selected' : ''}>${b}</option>`).join('');
     }
+    
     function addNewUser() { const n = document.getElementById('newUserName').value.trim(); if(n && !users.includes(n)) { users.push(n); renderAll(); } }
-    function removeUser(n) { if(confirm("確定刪除成員？")) { users = users.filter(u => u !== n); renderAll(); } }
+    function removeUser(n) { if(confirm("確定移除成員？")) { users = users.filter(u => u !== n); renderAll(); } }
     function renderUserTags() { document.getElementById('userTags').innerHTML = users.map(u => `<span class="tag">${u} <span style="color:var(--danger-color);cursor:pointer" onclick="removeUser('${u}')">×</span></span>`).join(''); }
+    
     function copyDataText() {
         const data = JSON.stringify({ u: users, r: records });
-        navigator.clipboard.writeText(data).then(() => alert("代碼已複製！"));
+        navigator.clipboard.writeText(data).then(() => alert("資料代碼已複製到剪貼簿！"));
     }
+    
     function importData() {
         const input = document.getElementById('importInput').value;
         try {
             const parsed = JSON.parse(input);
             if(parsed.u && parsed.r) { users = parsed.u; records = parsed.r; renderAll(); alert("資料還原成功！"); document.getElementById('importInput').value = ""; }
-        } catch(e) { alert("格式錯誤！"); }
+        } catch(e) { alert("代碼格式有誤，請確認後重試。"); }
     }
 </script>
 
