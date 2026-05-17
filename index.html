@@ -11,6 +11,7 @@
             --bg-color: #f7f9fb;
             --text-color: #4a4a4a;
             --danger-color: #e5989b;
+            --success-color: #6fb98f;
         }
 
         body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; margin: 0; padding: 15px; background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; }
@@ -35,11 +36,21 @@
         .btn-primary { background: var(--primary-color); color: white; border-radius: 6px; padding: 8px 20px; cursor: pointer; }
         .btn-danger { background: var(--danger-color); color: white; border-radius: 6px; padding: 6px 15px; font-size: 12px; cursor: pointer; border: none; }
 
+        /* 查詢面板區 */
         .query-screen { background: var(--primary-color); color: white; padding: 20px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .query-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
         .query-screen select { background: white; color: var(--text-color); border: 1px solid #ccc; border-radius: 6px; padding: 8px 12px; min-width: 200px; cursor: pointer; font-weight: 500; }
         .stats-bar { display: flex; gap: 30px; margin: 10px 0; font-size: 14px; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; }
         .stats-val { color: #ffe66d; font-weight: bold; font-size: 1.1em; }
+
+        /* 查詢結果名單排版 */
+        .query-list-section { margin-top: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+        .query-list-box { background: rgba(255,255,255,0.08); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
+        .query-list-title { font-size: 12px; font-weight: bold; margin-bottom: 8px; letter-spacing: 1px; display: flex; justify-content: space-between; }
+        
+        .unpaid-list, .paid-list { display: flex; flex-wrap: wrap; gap: 8px; }
+        .unpaid-name { background: var(--danger-color); color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .paid-name { background: var(--success-color); color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; }
 
         .detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 
@@ -97,14 +108,17 @@
         </div>
     </div>
 
+    <!-- 快速查詢視窗加強版 -->
     <div class="query-screen">
         <div class="query-header">
-            <span style="font-size: 1.1em; letter-spacing: 1px;">🚫 未繳費查詢</span>
+            <span style="font-size: 1.1em; letter-spacing: 1px;">📊 書目快速查詢面板</span>
             <select id="queryBookSelect" onchange="renderUnpaidQuery()">
                 <option value="">-- 請選取書名 --</option>
             </select>
         </div>
-        <div id="unpaidResultArea"></div>
+        <div id="unpaidResultArea">
+            <p style="font-size:12px; color: rgba(255,255,255,0.6); margin-top:5px;">請從上方選取書目以查看即時統計數據</p>
+        </div>
     </div>
 
     <div class="detail-header">
@@ -115,7 +129,7 @@
 </div>
 
 <script>
-    let users = ["林正義", "林陳雪紅", "於同心", "於簡瑋妤", "顧哲綸", "顧簡煜儒", "林筠倩", "魏家安", "李慧卿", "呂陳珮寧", "郭彥廷", "郭周瑞琪", "周洪明惠", "江桐郁", "江陳姱蓁", "鄭容朱", "俞勇", "俞葉蘭英", "申金秀麗", "翁勝利", "翁李世英", "陳黃素美", "曾蔡文惠", "李傳承", "劉怡心"];
+    let users = ["林正義", "林陈雪红", "於同心", "於簡瑋妤", "顧哲綸", "顧簡煜儒", "林筠倩", "魏家安", "李慧卿", "呂陳珮寧", "郭彥廷", "郭周瑞琪", "周洪明惠", "江桐郁", "江陳姱蓁", "鄭容朱", "俞勇", "俞葉蘭英", "申金秀麗", "翁勝利", "翁李世英", "陳黃素美", "曾蔡文惠", "李傳承", "劉怡心"];
     let records = [];
 
     window.onload = function() {
@@ -186,16 +200,49 @@
             area.innerHTML += html + `</tbody></table></div>`;
         });
     }
+
+    // --- 強化快速查詢面板功能 ---
     function renderUnpaidQuery() {
         const book = document.getElementById('queryBookSelect').value;
         const res = document.getElementById('unpaidResultArea');
-        if (!book) { res.innerHTML = ""; return; }
+        if (!book) { res.innerHTML = '<p style="font-size:12px; color: rgba(255,255,255,0.6); margin-top:5px;">請從上方選取書目以查看即時統計數據</p>'; return; }
+        
         const recs = records.filter(r => r.bookName === book);
-        const unpaid = recs.filter(r => !r.paid);
-        const sum = unpaid.reduce((s, r) => s + (r.price * r.qty), 0);
-        const names = [...new Set(unpaid.map(r => r.userName))];
-        res.innerHTML = `<div class="stats-bar"><div>訂購總數：<span class="stats-val">${recs.length}</span></div><div>金額總計：<span class="stats-val">$${sum}</span></div></div>${names.length ? `<div class="unpaid-list">${names.map(n => `<div class="unpaid-name">${n}</div>`).join('')}</div>` : '<p>✅ 已結清</p>'}`;
+        
+        // 篩選未繳與已繳紀錄
+        const unpaidRecords = recs.filter(r => !r.paid);
+        const paidRecords = recs.filter(r => r.paid);
+        
+        // 計算總額與總數
+        const totalQty = recs.reduce((s, r) => s + r.qty, 0);
+        const unpaidQty = unpaidRecords.reduce((s, r) => s + r.qty, 0);
+        const paidQty = paidRecords.reduce((s, r) => s + r.qty, 0);
+        const unpaidSum = unpaidRecords.reduce((s, r) => s + (r.price * r.qty), 0);
+
+        // 整理名單，顯示人名與其訂購的數量
+        let unpaidHTML = unpaidRecords.map(r => `<div class="unpaid-name">${r.userName} (${r.qty})</div>`).join('');
+        let paidHTML = paidRecords.map(r => `<div class="paid-name">${r.userName} (${r.qty})</div>`).join('');
+
+        res.innerHTML = `
+            <div class="stats-bar">
+                <div>總訂購數：<span class="stats-val">${totalQty}</span> 本</div>
+                <div>未收金額：<span class="stats-val">$${unpaidSum}</span></div>
+            </div>
+            <div class="query-list-section">
+                <!-- 未繳名單 -->
+                <div class="query-list-box">
+                    <div class="query-list-title"><span style="color:#ffb3b3;">⚠️ 尚未繳費</span> <span>共 ${unpaidQty} 本</span></div>
+                    <div class="unpaid-list">${unpaidHTML || '<p style="font-size:11px;color:rgba(255,255,255,0.4)">無</p>'}</div>
+                </div>
+                <!-- 已繳名單 -->
+                <div class="query-list-box">
+                    <div class="query-list-title"><span style="color:#b3ffcc;">✅ 完成繳費</span> <span>共 ${paidQty} 本</span></div>
+                    <div class="paid-list">${paidHTML || '<p style="font-size:11px;color:rgba(255,255,255,0.4)">無</p>'}</div>
+                </div>
+            </div>
+        `;
     }
+
     function updateNote(i, v) { records[i].note = v; saveData(); }
     function togglePaid(i) { records[i].paid = !records[i].paid; renderAll(); }
     function deleteSingle(i) { if(confirm("確定刪除？")) { records.splice(i, 1); renderAll(); } }
@@ -209,17 +256,13 @@
     function removeUser(n) { if(confirm("移除成員？")) { users = users.filter(u => u !== n); renderAll(); } }
     function renderUserTags() { document.getElementById('userTags').innerHTML = users.map(u => `<span class="tag">${u} <span style="color:var(--danger-color);cursor:pointer" onclick="removeUser('${u}')">×</span></span>`).join(''); }
 
-    // --- 加密與壓縮邏輯更新 ---
     function copyDataText() {
         const dataObj = { u: users, r: records };
-        const jsonStr = JSON.stringify(dataObj);
-        // 使用 Base64 編碼來縮短一點長度（視覺上也會變整齊）
         try {
-            const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
+            const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(dataObj))));
             navigator.clipboard.writeText(encoded).then(() => alert("壓縮代碼已複製！"));
         } catch(e) {
-            // 如果 Base64 出錯，備案使用原始字串
-            navigator.clipboard.writeText(jsonStr).then(() => alert("代碼已複製（未壓縮）"));
+            navigator.clipboard.writeText(JSON.stringify(dataObj)).then(() => alert("代碼已複製"));
         }
     }
     
@@ -227,23 +270,10 @@
         const input = document.getElementById('importInput').value.trim();
         if(!input) return;
         try {
-            let decodedStr = "";
-            if (input.startsWith('{')) {
-                decodedStr = input; // 原始 JSON
-            } else {
-                decodedStr = decodeURIComponent(escape(atob(input))); // 解碼 Base64
-            }
+            let decodedStr = input.startsWith('{') ? input : decodeURIComponent(escape(atob(input)));
             const parsed = JSON.parse(decodedStr);
-            if(parsed.u && parsed.r) { 
-                users = parsed.u; 
-                records = parsed.r; 
-                renderAll(); 
-                alert("還原成功！"); 
-                document.getElementById('importInput').value = ""; 
-            }
-        } catch(e) { 
-            alert("代碼無效或格式錯誤。"); 
-        }
+            if(parsed.u && parsed.r) { users = parsed.u; records = parsed.r; renderAll(); alert("資料還原成功！"); document.getElementById('importInput').value = ""; }
+        } catch(e) { alert("代碼格式錯誤。"); }
     }
 </script>
 
